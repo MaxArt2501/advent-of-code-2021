@@ -4,7 +4,9 @@ const maxPos = Math.max(...positions);
 
 const linearConsumptions = Array.from(
   { length: maxPos - minPos + 1 },
-  (_, pos) => positions.reduce((total, crabPos) => total + Math.abs(pos - crabPos), 0)
+  (_, pos) => positions.reduce(
+    (total, crabPos) => total + Math.abs(pos + minPos - crabPos), 0
+  )
 );
 
 console.log(Math.min(...linearConsumptions));
