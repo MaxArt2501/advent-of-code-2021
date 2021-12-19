@@ -20,73 +20,40 @@ const getFirstDeepNestedPair = (sfnum) => {
   return -1;
 };
 
-const getPreviousRegular = (sfnum, index) => {
-  const reversed = sfnum.slice(0, index).split('').reverse().join('');
-  const previousRegularEnd = reversed.search(/\d/);
-  if (previousRegularEnd < 0) {
-    return -1;
-  }
-  const nonDigitIndex = reversed.slice(previousRegularEnd).search(/\D/);
-  return index - previousRegularEnd - nonDigitIndex;
-};
-const getNextRegular = (sfnum, startIndex) => {
-  const index = sfnum.slice(startIndex + 1).search(/\d/);
-  return index >= 0 ? index + startIndex + 1 : -1;
-};
-
 const reduceNumber = number => {
   let reduced = number;
-  let irregularIndex;
+  let invalidIndex;
   do {
-    irregularIndex = getFirstDeepNestedPair(reduced);
-    if (irregularIndex >= 0) {
+    invalidIndex = getFirstDeepNestedPair(reduced);
+    if (invalidIndex >= 0) {
       // Exploding
-      let closingIndex = reduced.indexOf(']', irregularIndex);
+      let closingIndex = reduced.indexOf(']', invalidIndex);
       const [first, second] = reduced
-        .slice(irregularIndex + 1, closingIndex)
-        .split(',')
-        .map(Number);
-      reduced = reduced.slice(0, irregularIndex) + '0' + reduced.slice(closingIndex + 1);
-
-      const previousIndex = getPreviousRegular(reduced, irregularIndex);
-      if (previousIndex >= 0) {
-        const previousValue = parseInt(reduced.slice(previousIndex), 10);
-        const previousValueLength = String(previousValue).length;
-        const newValue = String(previousValue + first);
-        reduced =
-          reduced.slice(0, previousIndex) +
-          newValue +
-          reduced.slice(previousIndex + previousValueLength);
-        irregularIndex += newValue.length - previousValueLength;
-      }
-      const nextIndex = getNextRegular(reduced, irregularIndex);
-      if (nextIndex >= 0) {
-        const nextValue = parseInt(reduced.slice(nextIndex), 10);
-        const nextValueLength = String(nextValue).length;
-        const newValue = String(nextValue + second);
-        reduced =
-          reduced.slice(0, nextIndex) +
-          newValue +
-          reduced.slice(nextIndex + nextValueLength);
-      }
+        .slice(invalidIndex + 1, closingIndex)
+        .split(',').map(Number);
+      reduced = reduced.slice(0, invalidIndex)
+        .replace(/\d+(?=\D*$)/, regularNumber => Number(regularNumber) + first)
+        + '0'
+        + reduced.slice(closingIndex + 1)
+          .replace(/\d+/, regularNumber => Number(regularNumber) + second);
     } else {
-      irregularIndex = reduced.search(/\d{2}/);
-      if (irregularIndex >= 0) {
+      invalidIndex = reduced.search(/\d{2}/);
+      if (invalidIndex >= 0) {
         // Splitting
-        const value = parseInt(reduced.slice(irregularIndex), 10);
+        const value = parseInt(reduced.slice(invalidIndex), 10);
         reduced =
-          reduced.slice(0, irregularIndex) +
+          reduced.slice(0, invalidIndex) +
           `[${value >> 1},${value - (value >> 1)}]` +
-          reduced.slice(irregularIndex + String(value).length);
+          reduced.slice(invalidIndex + String(value).length);
       }
     }
-  } while (irregularIndex >= 0);
+  } while (invalidIndex >= 0);
   return reduced;
 };
 
 const sum = (num1, num2) => reduceNumber(`[${num1},${num2}]`);
 
-console.log(magnitude(JSON.parse(numbers.reduce((total, number) => sum(total, number)))));
+console.log(magnitude(JSON.parse(numbers.reduce(sum))));
 
 const magnitudes = numbers.flatMap(
   (number, index) => numbers.map(
