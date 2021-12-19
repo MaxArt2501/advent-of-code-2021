@@ -1,5 +1,3 @@
-const input = require('fs').readFileSync('./input.txt', 'utf-8')
-
 const numbers = input.trim().split('\n');
 
 const magnitude = ([a, b]) =>
