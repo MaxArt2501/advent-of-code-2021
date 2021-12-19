@@ -1,5 +1,3 @@
-const input = require('fs').readFileSync('./input.txt', 'utf-8')
-
 const joinCoords = coords => coords.join();
 const parseJoined = coords => coords.split(',').map(Number);
 
