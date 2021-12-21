@@ -1,4 +1,4 @@
-const [initialPos1, initialPos2] = input.trim().split('\n').map(
+const initialPositions = input.trim().split('\n').map(
   line => Number(line.slice('Player 1 starting position: '.length))
 );
 
@@ -10,30 +10,22 @@ const [initialPos1, initialPos2] = input.trim().split('\n').map(
 // thus leading to 6 different universes.
 const outcomeMap = { 3: 1, 4: 3, 5: 6, 6: 7, 7: 6, 8: 3, 9: 1 };
 
-let p1Wins = 0;
-let p2Wins = 0;
-function roll(score1, score2, pos1, pos2, universes) {
-  for (let outcome1 = 3; outcome1 <= 9; outcome1++) {
-    const p1Universes = universes * outcomeMap[outcome1];
-    const newPos1 = pos1 + outcome1;
-    const newScore1 = score1 + (newPos1 % 10 || 10);
-    if (newScore1 >= 21) {
-      p1Wins += p1Universes;
-      continue;
-    }
-    for (let outcome2 = 3; outcome2 <= 9; outcome2++) {
-      const newPos2 = pos2 + outcome2;
-      const newScore2 = score2 + (newPos2 % 10 || 10);
-      const p2Universes = p1Universes * outcomeMap[outcome2];
-      if (newScore2 >= 21) {
-        p2Wins += p2Universes;
-      } else {
-        roll(newScore1, newScore2, newPos1, newPos2, p2Universes);
-      }
+const wins = [0, 0];
+function roll(scores, positions, turn, universes) {
+  for (let outcome = 3; outcome <= 9; outcome++) {
+    const newUniverses = universes * outcomeMap[outcome];
+    const newPositions = positions.slice();
+    newPositions[turn] += outcome;
+    const newScores = scores.slice();
+    newScores[turn] += newPositions[turn] % 10 || 10;
+    if (newScores[turn] >= 21) {
+      wins[turn] += newUniverses;
+    } else {
+      roll(newScores, newPositions, 1 - turn, newUniverses);
     }
   }
 }
 
-roll(0, 0, initialPos1, initialPos2, 1);
+roll([0, 0], initialPositions, 0, 1);
 
-console.log(Math.max(p1Wins, p2Wins));
+console.log(Math.max(...wins));
