@@ -11,7 +11,7 @@ function getAroundIndex(image, row, column) {
     image[row - 1],
     image[row],
     image[row + 1]
-  ].map(line => line.substr(column + 1, 3));
+  ].map(line => line.substr(column - 1, 3));
   return parseInt(lines.join('').replace(/\./g, '0').replace(/#/g, '1'), 2);
 }
 
@@ -32,7 +32,7 @@ function enhance(image, filler = '.') {
   for (let row = 1; row < expanded.length - 1; row++) {
     const line = expanded[row];
     let newLine = '';
-    for (let column = -1; column < line.length - 3; column++) {
+    for (let column = 1; column < line.length - 1; column++) {
       newLine += enhanceString[getAroundIndex(expanded, row, column)];
     }
     enhanced.push(newLine);
